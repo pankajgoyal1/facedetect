@@ -1,6 +1,7 @@
 import React from 'react';
 import './FaceRecognition.css';
-const FaceRecognition = ({imageUrl,box})=>{
+const FaceRecognition = ({imageUrl,box,isSignedIn})=>{
+	if(isSignedIn)
 	return(
 		<div className='center ma'>
 			<div className='mt2 absolute'>
