@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import Logo from './Components/Logo';
-import FaceRecognition from './Components/FaceRecognition/FaceRecognition'
-import Clarifai from 'clarifai';
+import FaceRecognition from './Components/FaceRecognition/FaceRecognition';
 import Rank from './Components/Rank';
 import SearchBox from './Components/SearchBox';
 import Navigation from './Components/Navigation';
@@ -11,21 +10,32 @@ import Particles from 'react-particles-js';
 import Signin from './Components/Signin.js';
 import Register from './Components/Register.js';
 
-const app = new Clarifai.App({
- apiKey: '17c4369faa394932aff6e35ae8dfe073'
-});
 const Particle ={ 
 	particles: {
 		number:{
-			value:30,
+			value:50,
 			density:{
 				enable:true,
-				value_area:800
+				value_area:1000
 			}
 		}
 		}
-	}   
-let flag=false;
+	}
+const initialState={
+	input:'' ,
+	imageUrl:'',
+	box:{},
+	route:'signin',
+	isSignedIn:false,
+	user:{
+		id:'',
+		name:'',
+		email:'',
+		password:'',
+		entries:0,
+		joined:''
+	}
+}
 class App extends Component {
 	constructor(){
 		super();
@@ -78,9 +88,9 @@ class App extends Component {
 			this.setState({isSignedIn:true})
 		}
 		else{
-			this.setState({imageUrl:'',box:{}});
+			this.setState(initialState);
 			this.setState({isSignedIn:false})
-		}
+		} 
 		this.setState({route:route})
 	}
 	onInputChange =(event)=>{
@@ -88,10 +98,16 @@ class App extends Component {
 	}
 	onButtonSubmit =()=>{
 		this.setState({imageUrl:this.state.input});
-	  	app.models.predict(
-		Clarifai.FACE_DETECT_MODEL,
-		this.state.input)
-	   .then(response =>{
+	  	fetch('http://localhost:3000/imageurl',{
+	   			method:'post',
+	   			headers:{'Content-Type':'application/json'},
+	   			body:JSON.stringify({
+	   				input:this.state.input
+	   			})
+	   		})
+	  .then(response=>response.json())
+	  .then(response =>{
+	  	console.log(response);
 	   	if(response){
 	   		fetch('http://localhost:3000/image',{
 	   			method:'put',
@@ -104,11 +120,11 @@ class App extends Component {
 	   		.then(count=>{
 	   			this.setState(Object.assign(this.state.user, {entries:count}));
 	   		})
+	   		.catch(console.log)
 	   	}
-	   	flag=true;
 	   	this.detectFace(this.calculateFaceLocation(response))
 	   })
-	   .catch(err=> console.log(err));
+	   .catch(console.log);
 	}
     render() {
 
